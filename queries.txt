@@ -1,0 +1,42 @@
+all groups with less or equals student count:
+
+SELECT groups.* FROM
+	(SELECT group_id, COUNT(group_id) AS students_count
+	FROM public.students
+	GROUP BY group_id) as foo
+LEFT JOIN public.groups
+ON group_id = groups.id
+WHERE students_count <= 25;
+
+
+all students related to the course with a given name:
+
+SELECT students.* FROM public.students_courses_relation
+LEFT JOIN public.students
+ON students.id = student_id
+WHERE course_id =
+(SELECT id FROM public.courses
+WHERE name = 'math');
+
+
+Add new student:
+
+INSERT INTO public.students (group_id, first_name, last_name )
+VALUES (5, 'Wilman', 'Kala');
+
+
+Add a student to the course:
+
+INSERT INTO public.students_courses_relation (student_id, course_id)
+VALUES (201, 1);
+
+
+Remove the student from one of his or her courses:
+
+DELETE FROM public.students_courses_relation
+WHERE student_id = 201 AND course_id = 1;
+
+
+Delete student by STUDENT_ID
+
+DELETE FROM public.students WHERE students.id = 201;
