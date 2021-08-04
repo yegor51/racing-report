@@ -1,7 +1,7 @@
 import random
 import string
-from . import application
-from .models import db, GroupModel, CourseModel, StudentModel, students_courses_relation
+from .application import db
+from .models import GroupModel, CourseModel, StudentModel, students_courses_relation
 
 
 def clear_all_tables():

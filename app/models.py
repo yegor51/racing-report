@@ -1,7 +1,5 @@
-from .application import app
+from .application import app, db
 from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy(app)
 
 
 class GroupModel(db.Model):
@@ -48,7 +46,7 @@ class CourseModel(db.Model):
         self.description = description
 
 
-if not db.engine.table_names():
+if not db.engine.table_names() or StudentModel.query.count() == 0:
     from app.create_test_data import create_test_data
     db.create_all()
     create_test_data()

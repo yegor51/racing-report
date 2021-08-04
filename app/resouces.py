@@ -1,5 +1,5 @@
-from .application import api
-from .models import StudentModel, CourseModel, GroupModel, students_courses_relation, db
+from .application import api, db
+from .models import StudentModel, CourseModel, GroupModel, students_courses_relation
 from flask_restful import Resource
 from flask import request, jsonify
 
