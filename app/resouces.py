@@ -6,7 +6,12 @@ from flask import request, jsonify
 
 class StudentResource(Resource):
     def get(self, student_id):
+
         student = StudentModel.query.filter_by(id=student_id).first()
+
+        if not student:
+            return {}
+
         courses = db.session.query(students_courses_relation).filter_by(student_id=student_id)
         return jsonify({'first_name': student.first_name,
                         'last_name': student.last_name,
@@ -18,6 +23,10 @@ class StudentResource(Resource):
 class CourseResource(Resource):
     def get(self, course_id):
         course = CourseModel.query.filter_by(id=course_id).first()
+
+        if not course:
+            return {}
+
         students = db.session.query(students_courses_relation).filter_by(course_id=course_id)
         return jsonify({'name': course.name,
                         'description': course.description,
@@ -28,6 +37,10 @@ class CourseResource(Resource):
 class GroupResource(Resource):
     def get(self, group_id):
         group = GroupModel.query.filter_by(id=group_id).first()
+
+        if not group:
+            return {}
+
         students = db.session.query(StudentModel).filter_by(group_id=group_id)
         return jsonify({'name': group.name,
                         'students_ids': [student.id for student in students],

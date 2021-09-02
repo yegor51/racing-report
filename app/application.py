@@ -4,7 +4,7 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://test_user:1234@localhost:5432/test_db"
+app.config.from_object('app.config.Configuration')
 db = SQLAlchemy(app)
 api = Api(app)
 

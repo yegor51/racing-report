@@ -13,8 +13,8 @@ CREATE TABLE public.students
 (
     id integer PRIMARY KEY NOT NULL  DEFAULT nextval('students_id_seq'),
     group_id integer NOT NULL,
-	first_name character(100) NOT NULL,
-	last_name character(100) NOT NULL
+	first_name  varchar(100) NOT NULL,
+	last_name varchar(100) NOT NULL
 );
 ALTER TABLE public.students
     OWNER to test_user;
@@ -24,8 +24,8 @@ CREATE SEQUENCE courses_id_seq;
 CREATE TABLE public.courses
 (
     id integer PRIMARY KEY NOT NULL DEFAULT nextval('courses_id_seq'),
-	name character(100) NOT NULL,
-	description character(1000) NOT NULL
+	name varchar(100) NOT NULL,
+	description text NOT NULL
 );
 ALTER TABLE public.courses
     OWNER to test_user;
