@@ -1,7 +1,7 @@
 from .application import api, db
 from .models import StudentModel, CourseModel, GroupModel, students_courses_relation
 from flask_restful import Resource
-from flask import request, jsonify
+from flask import jsonify
 
 
 class StudentResource(Resource):
