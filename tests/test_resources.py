@@ -18,10 +18,7 @@ class TestGetMethodCase(unittest.TestCase):
         db.create_all()
 
     def setUp(self):
-        print(StudentModel.query.all())
-
         self.app = app.test_client()
-
 
         db.session.query(students_courses_relation).delete()
         GroupModel.query.delete()
