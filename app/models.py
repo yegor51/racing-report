@@ -1,3 +1,34 @@
+"""
+Contains SQLAlchemy models of tables
+automatically creates all tables in the database, if they are not, and test data,
+if any data not exist.
+
+tables:
+    GroupModel
+        fields:
+            id (int, primary_key)
+            name (str)
+
+    CourseModel
+        fields:
+            id (int, primary_key)
+            name (str)
+            description (str)
+
+    StudentModel
+        fields:
+            id (int, primary_key)
+            first_name (str)
+            last_name (str)
+            group_id (int)
+
+    students_courses_relation
+        special table, that presents MANY-TO-MANY relation between StudentModel and
+        CourseModel.
+        columns:
+            course_id (int, primary_key)
+            student_id (int, primary_key)
+"""
 from .application import app, db
 from flask_sqlalchemy import SQLAlchemy
 
@@ -46,7 +77,7 @@ class CourseModel(db.Model):
         self.description = description
 
 
-if not db.engine.table_names() or StudentModel.query.count() == 0:
+if not db.engine.table_names() or GroupModel.query.count() == 0 or CourseModel.query.count() == 0:
     from app.create_test_data import create_test_data
     db.create_all()
     create_test_data()

@@ -1,0 +1,70 @@
+files:
+    application.py:
+        file that initiate main application variables.
+        create an flask object at the `app` variable, SQLAlchemy object an the `db` variable,
+        and flask_restful.api object at `api` variable.
+
+        methods:
+           run_app: run app in the test localhost server.
+
+
+    models.py:
+        Contains SQLAlchemy models of tables
+        automatically creates all tables in the database, if they are not, and test data,
+        if any data not exist.
+
+        tables:
+            GroupModel
+                fields:
+                    id (int, primary_key)
+                    name (str)
+
+            CourseModel
+                fields:
+                    id (int, primary_key)
+                    name (str)
+                    description (str)
+
+            StudentModel
+                fields:
+                    id (int, primary_key)
+                    first_name (str)
+                    last_name (str)
+                    group_id (int)
+
+            students_courses_relation
+                special table, that presents MANY-TO-MANY relation between StudentModel and
+                CourseModel.
+                columns:
+                    course_id (int, primary_key)
+                    student_id (int, primary_key)
+
+
+    create_test_data.py:
+        consist functions to generate test data (item 2 of Task 10).
+
+        methods:
+            clear_all_tables:
+                delete all from the tables in the database.
+
+            get_random_group_name:
+                return string, composed from 2 random characters, hyphen, 2 random numbers.
+
+            get_random_group_id:
+                return id of random group from `GroupModel` table.
+
+            create_groups:
+                fill `GroupModel` table with example data, 10 randomly named group objects.
+
+            create_courses:
+                fill `CourseModel` table with example data, 10 courses with trivial descriptions.
+
+            create_students:
+                fill `StudentModel` table with example data, 200 students with randomly combined
+                first names\last names.
+
+            create_students_courses_relation:
+                randomly assign from 1 to 3 courses for each student.
+
+            create_test_data:
+                fill all tables in the database by example data.

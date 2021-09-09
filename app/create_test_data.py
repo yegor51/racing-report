@@ -1,3 +1,4 @@
+"""consist functions to generate test data (item 2 of Task 10)."""
 import random
 import string
 from .application import db
@@ -5,6 +6,7 @@ from .models import GroupModel, CourseModel, StudentModel, students_courses_rela
 
 
 def clear_all_tables():
+    """delete all from the tables in the database."""
     StudentModel.query.delete()
     CourseModel.query.delete()
     GroupModel.query.delete()
@@ -12,6 +14,7 @@ def clear_all_tables():
 
 
 def get_random_group_name():
+    """return string, composed from 2 random characters, hyphen, 2 random numbers."""
     name = ''
     for _ in range(2):
         name += random.choice(string.ascii_lowercase)
@@ -24,13 +27,20 @@ def get_random_group_name():
     return name
 
 
+def get_random_group_id():
+    """return id of random group from `GroupModel` table."""
+    return random.choice(GroupModel.query.all()).id
+
+
 def create_groups():
+    """fill `GroupModel` table with example data, 10 randomly named group objects."""
     for i in range(10):
         group = GroupModel(get_random_group_name())
         db.session.add(group)
 
 
 def create_courses():
+    """fill `CourseModel` table with example data, 10 courses with trivial descriptions."""
     courses = ['math', 'biology', 'art', 'geography', 'history',
                'english', 'chemistry', 'physics', 'Marketing', 'management']
 
@@ -39,11 +49,9 @@ def create_courses():
         db.session.add(course)
 
 
-def get_random_group_id():
-    return random.choice(GroupModel.query.all()).id
-
-
 def create_students():
+    """fill `StudentModel` table with example data, 200 students with randomly combined
+    first names\last names."""
     first_names = ['Liam', 'Noah', 'Oliver', 'Elijah', 'William',
                    'James', 'Benjamin', 'Lucas', 'Henry', 'Alexander',
                    'Olivia', 'Emma', 'Ava', 'Charlotte', 'Sophia',
@@ -60,6 +68,7 @@ def create_students():
 
 
 def create_students_courses_relation():
+    """randomly assign from 1 to 3 courses for each student."""
     courses_list = CourseModel.query.all()
 
     for student in StudentModel.query.all():
@@ -68,6 +77,7 @@ def create_students_courses_relation():
 
 
 def create_test_data():
+    """fill all tables in the database by example data."""
     clear_all_tables()
     create_groups()
     create_students()
