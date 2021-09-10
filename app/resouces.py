@@ -8,7 +8,7 @@ resources:
                 'first_name' - str, first name of student
                 'last_name' - str, last name of student
                 'group_id' - int, id of student group
-                'courses_ids' - list of ids of student courses
+                'courses_ids' - list of course IDs of this student
 
     CourseResource:
         get method:
@@ -17,14 +17,14 @@ resources:
              json keys:
                 'name' - str, name of the course
                 'description' - str, description of the course
-                'students_ids' - list of ids of students, joined to the course
+                'students_ids' - list of student IDs, joined to the course
 
     GroupResource:
         get method:
             return data about group by group id from the 'groups' table in json format.
             json keys:
                 'name' - str, name of the group
-                'students_ids' - list of ids of all students in this group"""
+                'students_ids' - list of IDs of all students in this group"""
 from .application import api, db
 from .models import StudentModel, CourseModel, GroupModel, students_courses_relation
 from flask_restful import Resource
