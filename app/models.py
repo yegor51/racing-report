@@ -3,7 +3,7 @@ Contains SQLAlchemy models of tables
 automatically creates all tables in the database, if they are not, and test data,
 if any data not exist.
 
-tables:
+models:
     GroupModel
         fields:
             id (int, primary_key)
@@ -22,6 +22,7 @@ tables:
             last_name (str)
             group_id (int)
 
+tables:
     students_courses_relation
         special table, that presents MANY-TO-MANY relation between StudentModel and
         CourseModel.

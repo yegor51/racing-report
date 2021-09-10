@@ -1,4 +1,4 @@
-"""consist functions to generate test data (item 2 of Task 10)."""
+"""functions to generate test data (item 2 of Task 10)."""
 import random
 import string
 from .application import db
@@ -33,14 +33,14 @@ def get_random_group_id():
 
 
 def create_groups():
-    """fill `GroupModel` table with example data, 10 randomly named group objects."""
+    """fill `groups` table with example data, 10 randomly named group objects."""
     for i in range(10):
         group = GroupModel(get_random_group_name())
         db.session.add(group)
 
 
 def create_courses():
-    """fill `CourseModel` table with example data, 10 courses with trivial descriptions."""
+    """fill `courses` table with example data, 10 courses with trivial descriptions."""
     courses = ['math', 'biology', 'art', 'geography', 'history',
                'english', 'chemistry', 'physics', 'Marketing', 'management']
 
@@ -50,7 +50,7 @@ def create_courses():
 
 
 def create_students():
-    """fill `StudentModel` table with example data, 200 students with randomly combined
+    """fill `students` table with example data, 200 students with randomly combined
     first names\last names."""
     first_names = ['Liam', 'Noah', 'Oliver', 'Elijah', 'William',
                    'James', 'Benjamin', 'Lucas', 'Henry', 'Alexander',

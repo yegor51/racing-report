@@ -1,4 +1,4 @@
-"""file that initiate main application variables.
+"""initiate main application variables.
 create an flask object at the `app` variable, SQLAlchemy object an the `db` variable,
 and flask_restful.api object at `api` variable."""
 
