@@ -8,26 +8,16 @@ postgresql = testing.postgresql.Postgresql(port=7654)
 Configuration.SQLALCHEMY_DATABASE_URI = postgresql.url()
 
 from app.application import app, db
-from app.models import students_courses_relation, StudentModel, GroupModel, CourseModel
+from app.models import StudentModel, GroupModel, CourseModel
 
 
 class TestGetMethodCase(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        db.create_all()
-
     def setUp(self):
         """clear all data from test database after previous test."""
         self.app = app.test_client()
-
-        db.session.query(students_courses_relation).delete()
-        GroupModel.query.delete()
-        CourseModel.query.delete()
-        StudentModel.query.delete()
-        db.session.execute("ALTER SEQUENCE students_id_seq RESTART WITH 1")
-        db.session.execute("ALTER SEQUENCE groups_id_seq RESTART WITH 1")
-        db.session.execute("ALTER SEQUENCE courses_id_seq RESTART WITH 1")
+        db.drop_all()
+        db.create_all()
         db.session.commit()
 
     def create_test_student(self):

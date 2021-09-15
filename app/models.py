@@ -54,7 +54,7 @@ class StudentModel(db.Model):
     __tablename__ = 'students'
 
     id = db.Column(db.Integer, primary_key=True)
-    group_id = db.Column(db.Integer)
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
     first_name = db.Column(db.String)
     last_name = db.Column(db.String)
     courses = db.relationship('CourseModel', secondary=students_courses_relation, lazy='subquery',

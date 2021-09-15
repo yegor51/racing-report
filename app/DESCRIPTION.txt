@@ -1,101 +1,104 @@
-files:
-    application.py:
-        initiate main application variables.
-        create an flask object at the `app` variable, SQLAlchemy object an the `db` variable,
-        and flask_restful.api object at `api` variable.
+application.py:
+    initiate main application variables.
+    create an flask object at the `app` variable, SQLAlchemy object an the `db` variable,
+    and flask_restful.api object at `api` variable.
 
-        methods:
-           run_app: run app in the test localhost server.
-
-
-    models.py:
-        Contains SQLAlchemy models of tables
-        automatically creates all tables in the database, if they are not, and test data,
-        if any data not exist.
-
-        models:
-            GroupModel
-                fields:
-                    id (int, primary_key)
-                    name (str)
-
-            CourseModel
-                fields:
-                    id (int, primary_key)
-                    name (str)
-                    description (str)
-
-            StudentModel
-                fields:
-                    id (int, primary_key)
-                    first_name (str)
-                    last_name (str)
-                    group_id (int)
-
-        tables:
-            students_courses_relation
-                special table, that presents MANY-TO-MANY relation between StudentModel and
-                CourseModel.
-                columns:
-                    course_id (int, primary_key)
-                    student_id (int, primary_key)
+    methods:
+       run_app: run app in the test localhost server.
 
 
-    create_test_data.py:
-        consist functions to generate test data (item 2 of Task 10).
+models.py:
+    Contains SQLAlchemy models of tables
+    automatically creates all tables in the database, if they are not, and test data,
+    if any data not exist.
 
-        methods:
-            clear_all_tables:
-                delete all from the tables in the database.
+    models:
+        GroupModel
+            fields:
+                id (int, primary_key)
+                name (str)
 
-            get_random_group_name:
-                return string, composed from 2 random characters, hyphen, 2 random numbers.
+        CourseModel
+            fields:
+                id (int, primary_key)
+                name (str)
+                description (str)
 
-            get_random_group_id:
-                return id of random group from `groups` table.
+        StudentModel
+            fields:
+                id (int, primary_key)
+                first_name (str)
+                last_name (str)
+                group_id (int)
 
-            create_groups:
-                fill `groups` table with example data, 10 randomly named group objects.
+    tables:
+        students_courses_relation
+            special table, that presents MANY-TO-MANY relation between StudentModel and
+            CourseModel.
+            columns:
+                course_id (int, primary_key)
+                student_id (int, primary_key)
 
-            create_courses:
-                fill `courses` table with example data, 10 courses with trivial descriptions.
 
-            create_students:
-                fill `students` table with example data, 200 students with randomly combined
-                first names\last names.
+create_test_data.py:
+    consist functions to generate test data (item 2 of Task 10).
 
-            create_students_courses_relation:
-                randomly assign from 1 to 3 courses for each student.
+    methods:
+        clear_all_tables:
+            delete all from the tables in the database.
 
-            create_test_data:
-                fill all tables in the database by example data.
+        get_random_group_name:
+            return string, composed from 2 random characters, hyphen, 2 random numbers.
 
-    resources.py:
-        create api resources using flask_restful module. Used json format for returned data.
+        get_random_group_id:
+            return id of random group from `groups` table.
 
-        resources:
-            StudentResource:
-                get method:
-                    return data about student by student id from the `students` table in json
-                    format.
-                    json keys:
-                        'first_name' - str, first name of student
-                        'last_name' - str, last name of student
-                        'group_id' - int, id of student group
-                        'courses_ids' - list of course IDs of this student
+        create_groups:
+            fill `groups` table with example data, 10 randomly named group objects.
 
-            CourseResource:
-                get method:
-                     return data about course by course id from the `courses` table in json
-                     format.
-                     json keys:
-                        'name' - str, name of the course
-                        'description' - str, description of the course
-                        'students_ids' - list of student IDs, joined to the course
+        create_courses:
+            fill `courses` table with example data, 10 courses with trivial descriptions.
 
-            GroupResource:
-                get method:
-                    return data about group by group id from the 'groups' table in json format.
-                    json keys:
-                        'name' - str, name of the group
-                        'students_ids' - list of IDs of all students in this group
+        create_students:
+            fill `students` table with example data, 200 students with randomly combined
+            first names\last names.
+
+        create_students_courses_relation:
+            randomly assign from 1 to 3 courses for each student.
+
+        create_test_data:
+            fill all tables in the database by example data.
+
+resources.py:
+    create api resources using flask_restful module. Used json format for returned data.
+
+    resources:
+        StudentResource:
+            get method:
+                return data about student by student id from the `students` table in json
+                format.
+                json keys:
+                    'first_name' - str, first name of student
+                    'last_name' - str, last name of student
+                    'group_id' - int, id of student group
+                    'courses_ids' - list of course IDs of this student
+
+        CourseResource:
+            get method:
+                 return data about course by course id from the `courses` table in json
+                 format.
+                 json keys:
+                    'name' - str, name of the course
+                    'description' - str, description of the course
+                    'students_ids' - list of student IDs, joined to the course
+
+        GroupResource:
+            get method:
+                return data about group by group id from the 'groups' table in json format.
+                json keys:
+                    'name' - str, name of the group
+                    'students_ids' - list of IDs of all students in this group
+
+
+SQL files:
+sql/create_user_and_database.sql
