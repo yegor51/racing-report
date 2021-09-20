@@ -52,7 +52,7 @@ class StudentResource(Resource):
         student = StudentModel.query.filter_by(id=student_id).first()
 
         if not student:
-            return 'ERROR: student with if {} not exist.'.format(student_id)
+            return 'ERROR: student with id {} not exist.'.format(student_id)
 
         if 'first_name' in request.form:
             student.first_name = request.form['first_name']
@@ -63,7 +63,10 @@ class StudentResource(Resource):
         if 'group_id' in request.form:
             student.group_id = request.form['group_id']
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError:
+            return 'ERROR: incorrect data.'
 
         return {'id': student.id,
                 'first_name': student.first_name,
@@ -75,7 +78,7 @@ class StudentResource(Resource):
         student = StudentModel.query.filter_by(id=student_id).first()
 
         if not student:
-            return 'ERROR: student with if {} not exist.'.format(student_id)
+            return 'ERROR: student with id {} not exist.'.format(student_id)
 
         db.session.delete(student)
         db.session.commit()
@@ -101,7 +104,7 @@ class CourseResource(Resource):
         course = CourseModel.query.filter_by(id=course_id).first()
 
         if not course:
-            return 'ERROR: course with if {} not exist.'.format(course)
+            return 'ERROR: course with id {} not exist.'.format(course)
 
         if 'name' in request.form:
             course.name = request.form['name']
@@ -121,7 +124,7 @@ class CourseResource(Resource):
         course = CourseModel.query.filter_by(id=course_id).first()
 
         if not course:
-            return 'ERROR: course with if {} not exist.'.format(course)
+            return 'ERROR: course with id {} not exist.'.format(course_id)
 
         db.session.delete(course)
         db.session.commit()
@@ -145,7 +148,7 @@ class GroupResource(Resource):
     def put(self, group_id):
         group = GroupModel.query.filter_by(id=group_id).first()
         if not group:
-            return 'ERROR: group with if {} not exist.'.format(group_id)
+            return 'ERROR: group with id {} not exist.'.format(group_id)
 
         if 'name' in request.form:
             group_name = request.form['name']
@@ -161,17 +164,18 @@ class GroupResource(Resource):
 
     def delete(self, group_id):
         group = GroupModel.query.filter_by(id=group_id).first()
-        if not group:
-            return 'ERROR: group with if {} not exist.'.format(group_id)
 
-        try:
-            db.session.delete(group)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            students = db.session.query(StudentModel).filter_by(group_id=group_id)
+        if not group:
+            return 'ERROR: group with id {} not exist.'.format(group_id)
+
+        students = db.session.query(StudentModel).filter_by(group_id=group_id).all()
+
+        if students:
             students_ids = [str(student.id) for student in students]
             return 'ERROR: cannot delete the group with students. Student ids: {}'.format(', '.join(students_ids))
+
+        db.session.delete(group)
+        db.session.commit()
 
         return 'deleted group {}'.format(group_id)
 

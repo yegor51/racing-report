@@ -31,7 +31,6 @@ tables:
             student_id (int, primary_key)
 """
 from .application import app, db
-from flask_sqlalchemy import SQLAlchemy
 
 
 class GroupModel(db.Model):
