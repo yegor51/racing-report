@@ -9,10 +9,10 @@ def get_student(student_id):
     student = StudentModel.query.filter_by(id=student_id).first()
 
     if not student:
-        return {}
+        db.session.rollback()
+        raise AssertionError('student with id {} not exist'.format(student_id))
 
     courses = db.session.query(students_courses_relation).filter_by(student_id=student_id)
-
     return {'first_name': student.first_name,
             'last_name': student.last_name,
             'group_id': student.group_id,
@@ -24,7 +24,8 @@ def put_student(student_id, data):
     student = StudentModel.query.filter_by(id=student_id).first()
 
     if not student:
-        return 'ERROR: student with id {} not exist.'.format(student_id)
+        db.session.rollback()
+        raise AssertionError('student with id {} not exist'.format(student_id))
 
     if 'first_name' in data:
         student.first_name = data['first_name']
@@ -38,7 +39,8 @@ def put_student(student_id, data):
     try:
         db.session.commit()
     except IntegrityError:
-        return 'ERROR: incorrect data.'
+        db.session.rollback()
+        raise AssertionError('Incorrect data.')
 
     return {'id': student.id,
             'first_name': student.first_name,
@@ -50,8 +52,7 @@ def put_student(student_id, data):
 def delete_student(student_id):
     student = StudentModel.query.filter_by(id=student_id).first()
 
-    if not student:
-        return 'ERROR: student with id {} not exist.'.format(student_id)
+    assert student, 'student with id {} not exist.'.format(student_id)
 
     db.session.delete(student)
     db.session.commit()
@@ -64,7 +65,8 @@ def get_course(course_id):
     course = CourseModel.query.filter_by(id=course_id).first()
 
     if not course:
-        return {}
+        db.session.rollback()
+        raise AssertionError('course with id {} not exist'.format(course_id))
 
     students = db.session.query(students_courses_relation).filter_by(course_id=course_id)
     return {'name': course.name,
@@ -76,8 +78,7 @@ def get_course(course_id):
 def put_course(course_id, data):
     course = CourseModel.query.filter_by(id=course_id).first()
 
-    if not course:
-        return 'ERROR: course with id {} not exist.'.format(course)
+    assert course, 'course with id {} not exist.'.format(course)
 
     if 'name' in data:
         course.name = data['name']
@@ -97,8 +98,7 @@ def put_course(course_id, data):
 def delete_course(course_id):
     course = CourseModel.query.filter_by(id=course_id).first()
 
-    if not course:
-        return 'ERROR: course with id {} not exist.'.format(course_id)
+    assert course, 'course with id {} not exist.'.format(course_id)
 
     db.session.delete(course)
     db.session.commit()
@@ -111,7 +111,8 @@ def get_group(group_id):
     group = GroupModel.query.filter_by(id=group_id).first()
 
     if not group:
-        return {}
+        db.session.rollback()
+        raise AssertionError('group with id {} not exist'.format(group))
 
     students = db.session.query(StudentModel).filter_by(group_id=group_id)
     return {'name': group.name,
@@ -121,14 +122,12 @@ def get_group(group_id):
 
 def put_group(group_id, data):
     group = GroupModel.query.filter_by(id=group_id).first()
-    if not group:
-        return 'ERROR: group with id {} not exist.'.format(group_id)
+    assert group, 'group with id {} not exist.'.format(group_id)
 
     if 'name' in data:
         group_name = data['name']
 
-        if not re.search("[a-z][a-z]-[0-9][0-9]", group_name):
-            return 'ERROR: wrong name format.'
+        assert re.search("[a-z][a-z]-[0-9][0-9]", group_name), 'wrong name format.'
 
         group.name = group_name
 
@@ -140,14 +139,13 @@ def put_group(group_id, data):
 def delete_group(group_id):
     group = GroupModel.query.filter_by(id=group_id).first()
 
-    if not group:
-        return 'ERROR: group with id {} not exist.'.format(group_id)
+    assert group, 'group with id {} not exist.'.format(group_id)
 
     students = db.session.query(StudentModel).filter_by(group_id=group_id).all()
 
-    if students:
-        students_ids = [str(student.id) for student in students]
-        return 'ERROR: cannot delete the group with students. Student ids: {}'.format(', '.join(students_ids))
+    assert not students, \
+        'cannot delete the group with students. Student ids: {}'\
+            .format(', '.join([str(student.id) for student in students]))
 
     db.session.delete(group)
     db.session.commit()
@@ -174,8 +172,8 @@ def post_student(data):
     student_last_name = data.get('last_name')
     student_group_id = data.get('group_id')
 
-    if None in (student_first_name, student_last_name, student_group_id):
-        return "ERROR: all parameters (first_name, last_name, group_id) must be specified."
+    assert None not in (student_first_name, student_last_name, student_group_id),\
+        "all parameters (first_name, last_name, group_id) must be specified."
 
     student = StudentModel(student_group_id, student_first_name, student_last_name)
 
@@ -183,7 +181,8 @@ def post_student(data):
         db.session.add(student)
         db.session.commit()
     except IntegrityError:
-        return 'ERROR: incorrect data.'
+        db.session.rollback()
+        raise AssertionError('incorrect data.')
 
     return {
             'id': student.id,
@@ -210,8 +209,8 @@ def post_course(data):
     course_name = data.get('name')
     course_description = data.get('description')
 
-    if None in (course_name, course_description):
-        return "ERROR: all parameters (name, description) must be specified."
+    assert None not in (course_name, course_description), \
+        "all parameters (name, description) must be specified."
 
     course = CourseModel(course_name, course_description)
 
@@ -219,7 +218,7 @@ def post_course(data):
         db.session.add(course)
         db.session.commit()
     except IntegrityError:
-        return 'ERROR: incorrect data.'
+        raise AssertionError('incorrect data.')
 
     return {
             'id': course.id,
@@ -243,11 +242,9 @@ def get_all_groups():
 def post_group(data):
     group_name = data.get('name')
 
-    if not group_name:
-        return "ERROR: parameter `name` must be specified."
+    assert group_name, "parameter `name` must be specified."
 
-    if not re.search("[a-z][a-z]-[0-9][0-9]", group_name):
-        return 'ERROR: wrong name format.'
+    assert re.search("[a-z][a-z]-[0-9][0-9]", group_name), 'wrong name format.'
 
     group = GroupModel(group_name)
 
@@ -255,4 +252,5 @@ def post_group(data):
         db.session.add(group)
         db.session.commit()
     except IntegrityError:
-        return('ERROR: incorect data.')
+        db.session.rollback()
+        raise AssertionError('incorrect data.')
