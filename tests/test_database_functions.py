@@ -59,11 +59,13 @@ class TestGetMethodsCase(unittest.TestCase):
         (get_student,),
         (get_course,),
     ])
-    def test_function_with_wrong_id(self, function):
+    def test_functions_with_wrong_id(self, function):
+        """all get_ functions should call exception if called with a non-existent id"""
         with self.assertRaises(AssertionError):
             function(5)
 
-    def test_groups(self):
+    def test_get_group(self):
+        """test get_group normal working"""
         create_test_groups(1)
 
         data = get_group(1)
@@ -71,7 +73,8 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data['name'], 'aa-01')
         self.assertEqual(data['students_ids'], [])
 
-    def test_groups_with_students(self):
+    def test_get_group_with_students(self):
+        """test get_group, normal displaying group with students"""
         create_test_groups(1)
         create_test_students(1)
 
@@ -79,7 +82,8 @@ class TestGetMethodsCase(unittest.TestCase):
 
         self.assertEqual(data['students_ids'], [1])
 
-    def test_students(self):
+    def test_get_student(self):
+        """test get_student normal working"""
         create_test_groups(1)
         create_test_students(1)
 
@@ -89,7 +93,8 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data['last_name'], 'last_name_1')
         self.assertEqual(data['courses_ids'], [])
 
-    def test_students_with_courses(self):
+    def test_get_student_with_courses(self):
+        """test get_student, normal displaying student with course."""
         create_test_groups(1)
         create_test_student_with_course()
 
@@ -97,10 +102,8 @@ class TestGetMethodsCase(unittest.TestCase):
 
         self.assertEqual(data['courses_ids'], [1])
 
-    def test_courses(self):
-        """test CourseResource GET method data displaying.
-        returned data should contain name and description of this course.
-        """
+    def test_get_course(self):
+        """test get_course normal working"""
         create_test_courses(1)
 
         data = get_course(1)
@@ -109,10 +112,8 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data['description'], 'test_description_1')
         self.assertEqual(data['students_ids'], [])
 
-    def test_courses_with_students(self):
-        """test CourseResource GET method data displaying.
-        returned data should contain list of student IDs, joined to this course.
-        """
+    def test_get_course_with_students(self):
+        """test get_course, normal displaying course with students."""
         create_test_groups(1)
         create_test_student_with_course()
 
@@ -121,6 +122,7 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data['students_ids'], [1])
 
     def test_students_list(self):
+        """test get_all_students function"""
         create_test_groups(1)
         create_test_students(2)
 
@@ -135,6 +137,7 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data[1]['last_name'], 'last_name_2')
 
     def test_courses_list(self):
+        """test get_all_courses function"""
         create_test_courses(2)
 
         data = get_all_courses()
@@ -148,6 +151,7 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data[1]['description'], 'test_description_2')
 
     def test_groups_list(self):
+        """test get_all_group function"""
         create_test_groups(2)
 
         data = get_all_groups()
@@ -168,7 +172,8 @@ class TestPostMethodsCase(unittest.TestCase):
         db.create_all()
         db.session.commit()
 
-    def test_student(self):
+    def test_post_student(self):
+        """test post student function"""
         create_test_groups()
         post_student(data={'first_name': 'test_first_name',
                            'last_name': 'test_last_name',

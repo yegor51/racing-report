@@ -99,6 +99,5 @@ resources.py:
                     'name' - str, name of the group
                     'students_ids' - list of IDs of all students in this group
 
-
-SQL files:
-sql/create_user_and_database.sql
+database_functions.py:
+    functions that gets, inserts, updates, deletes data from the database tables.

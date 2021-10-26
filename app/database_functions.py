@@ -1,3 +1,4 @@
+"""functions that gets, inserts, updates, deletes data from the database."""
 import re
 from .application import api, db
 from .models import StudentModel, CourseModel, GroupModel, students_courses_relation
@@ -8,9 +9,7 @@ def get_student(student_id):
     """return data about student by student id from the `students` table in json format."""
     student = StudentModel.query.filter_by(id=student_id).first()
 
-    if not student:
-        db.session.rollback()
-        raise AssertionError('student with id {} not exist'.format(student_id))
+    assert student, 'student with id {} not exist'.format(student_id)
 
     courses = db.session.query(students_courses_relation).filter_by(student_id=student_id)
     return {'first_name': student.first_name,
@@ -23,9 +22,7 @@ def get_student(student_id):
 def put_student(student_id, data):
     student = StudentModel.query.filter_by(id=student_id).first()
 
-    if not student:
-        db.session.rollback()
-        raise AssertionError('student with id {} not exist'.format(student_id))
+    assert student, 'student with id {} not exist'.format(student_id)
 
     if 'first_name' in data:
         student.first_name = data['first_name']
@@ -64,9 +61,7 @@ def get_course(course_id):
     """return data about course by course id from the `courses` table in json format."""
     course = CourseModel.query.filter_by(id=course_id).first()
 
-    if not course:
-        db.session.rollback()
-        raise AssertionError('course with id {} not exist'.format(course_id))
+    assert course, 'course with id {} not exist'.format(course_id)
 
     students = db.session.query(students_courses_relation).filter_by(course_id=course_id)
     return {'name': course.name,
@@ -110,9 +105,7 @@ def get_group(group_id):
     """return data about group by group id from the 'groups' table in json format."""
     group = GroupModel.query.filter_by(id=group_id).first()
 
-    if not group:
-        db.session.rollback()
-        raise AssertionError('group with id {} not exist'.format(group))
+    assert group, 'group with id {} not exist'.format(group)
 
     students = db.session.query(StudentModel).filter_by(group_id=group_id)
     return {'name': group.name,
