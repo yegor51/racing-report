@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 def get_student(student_id):
     """return data about student by student id from the `students` table in json format."""
-    student = StudentModel.query.filter_by(id=student_id).first()
+    student = db.session.get(StudentModel, student_id)
 
     assert student, 'student with id {} not exist'.format(student_id)
 
@@ -20,7 +20,7 @@ def get_student(student_id):
 
 
 def put_student(student_id, data):
-    student = StudentModel.query.filter_by(id=student_id).first()
+    student = db.session.get(StudentModel, student_id)
 
     assert student, 'student with id {} not exist'.format(student_id)
 
@@ -47,7 +47,7 @@ def put_student(student_id, data):
 
 
 def delete_student(student_id):
-    student = StudentModel.query.filter_by(id=student_id).first()
+    student = db.session.get(StudentModel, student_id)
 
     assert student, 'student with id {} not exist.'.format(student_id)
 
@@ -59,7 +59,7 @@ def delete_student(student_id):
 
 def get_course(course_id):
     """return data about course by course id from the `courses` table in json format."""
-    course = CourseModel.query.filter_by(id=course_id).first()
+    course = db.session.get(CourseModel, course_id)
 
     assert course, 'course with id {} not exist'.format(course_id)
 
@@ -71,7 +71,7 @@ def get_course(course_id):
 
 
 def put_course(course_id, data):
-    course = CourseModel.query.filter_by(id=course_id).first()
+    course = db.session.get(CourseModel, course_id)
 
     assert course, 'course with id {} not exist.'.format(course)
 
@@ -96,14 +96,18 @@ def delete_course(course_id):
     assert course, 'course with id {} not exist.'.format(course_id)
 
     db.session.delete(course)
-    db.session.commit()
 
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        raise AssertionError('Incorrect data.')
     return 'deleted course {}.'.format(course_id)
 
 
 def get_group(group_id):
     """return data about group by group id from the 'groups' table in json format."""
-    group = GroupModel.query.filter_by(id=group_id).first()
+    group = db.session.get(GroupModel, group_id)
 
     assert group, 'group with id {} not exist'.format(group)
 
@@ -114,7 +118,7 @@ def get_group(group_id):
 
 
 def put_group(group_id, data):
-    group = GroupModel.query.filter_by(id=group_id).first()
+    group = db.session.get(GroupModel, group_id)
     assert group, 'group with id {} not exist.'.format(group_id)
 
     if 'name' in data:
@@ -130,7 +134,7 @@ def put_group(group_id, data):
 
 
 def delete_group(group_id):
-    group = GroupModel.query.filter_by(id=group_id).first()
+    group = db.session.get(GroupModel, group_id)
 
     assert group, 'group with id {} not exist.'.format(group_id)
 
