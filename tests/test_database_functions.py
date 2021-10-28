@@ -60,9 +60,9 @@ class TestGetMethodsCase(unittest.TestCase):
         (get_course,),
     ])
     def test_functions_with_wrong_id(self, function):
-        """all get_ functions should call exception if called with a non-existent id"""
-        with self.assertRaises(AssertionError):
-            function(5)
+        """all get_ functions should return {} if called with a non-existent id"""
+        answer = function(5)
+        self.assertEqual(answer, {})
 
     def test_get_group(self):
         """test get_group normal working"""

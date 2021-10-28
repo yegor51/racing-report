@@ -30,13 +30,25 @@ from flask_restful import Resource
 from .database_functions import *
 
 
+def return_assertion_massages_decorator(f):
+    def warper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except AssertionError as e:
+            return 'error during operation: ' + str(e)
+
+    return warper
+
+
 class StudentResource(Resource):
     def get(self, student_id):
         return get_student(student_id)
 
+    @return_assertion_massages_decorator
     def put(self, student_id):
         return put_student(student_id, request.form)
 
+    @return_assertion_massages_decorator
     def delete(self, student_id):
         return delete_student(student_id)
 
@@ -45,9 +57,11 @@ class CourseResource(Resource):
     def get(self, course_id):
         return get_course(course_id)
 
+    @return_assertion_massages_decorator
     def put(self, course_id):
         return put_course(course_id, request.form)
 
+    @return_assertion_massages_decorator
     def delete(self, course_id):
         return delete_course(course_id)
 
@@ -56,9 +70,11 @@ class GroupResource(Resource):
     def get(self, group_id):
         return get_group(group_id)
 
+    @return_assertion_massages_decorator
     def put(self, group_id):
         return put_group(group_id, request.form)
 
+    @return_assertion_massages_decorator
     def delete(self, group_id):
         return delete_group(group_id)
 
@@ -67,6 +83,7 @@ class StudentListResource(Resource):
     def get(self):
         return get_all_students()
 
+    @return_assertion_massages_decorator
     def post(self):
         return post_student(request.form)
 
@@ -75,6 +92,7 @@ class CourseListResource(Resource):
     def get(self):
         return get_all_courses()
 
+    @return_assertion_massages_decorator
     def post(self):
         return post_course(request.form)
 
@@ -83,6 +101,7 @@ class GroupListResource(Resource):
     def get(self):
         return get_all_groups()
 
+    @return_assertion_massages_decorator
     def post(self):
         return post_group(request.form)
 

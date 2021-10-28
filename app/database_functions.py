@@ -9,7 +9,8 @@ def get_student(student_id):
     """return data about student by student id from the `students` table in json format."""
     student = db.session.get(StudentModel, student_id)
 
-    assert student, 'student with id {} not exist'.format(student_id)
+    if not student:
+        return {}
 
     courses = db.session.query(students_courses_relation).filter_by(student_id=student_id)
     return {'first_name': student.first_name,
@@ -61,7 +62,8 @@ def get_course(course_id):
     """return data about course by course id from the `courses` table in json format."""
     course = db.session.get(CourseModel, course_id)
 
-    assert course, 'course with id {} not exist'.format(course_id)
+    if not course:
+        return {}
 
     students = db.session.query(students_courses_relation).filter_by(course_id=course_id)
     return {'name': course.name,
@@ -109,7 +111,8 @@ def get_group(group_id):
     """return data about group by group id from the 'groups' table in json format."""
     group = db.session.get(GroupModel, group_id)
 
-    assert group, 'group with id {} not exist'.format(group)
+    if not group:
+        return {}
 
     students = db.session.query(StudentModel).filter_by(group_id=group_id)
     return {'name': group.name,

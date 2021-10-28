@@ -61,6 +61,23 @@ class TestResourcesCase(unittest.TestCase):
             self.assertTrue('sample data' in answer.data.decode('utf8'))
             mocked_function.assert_called_with(ImmutableMultiDict([('test_key', 'test_value')]))
 
+    @parameterized.expand([
+        ('put', 'app.resources.put_student', '/students/1/'),
+        ('put', 'app.resources.put_course', '/courses/1/'),
+        ('put', 'app.resources.put_group', '/groups/1/'),
+        ('delete', 'app.resources.delete_student', '/students/1/'),
+        ('delete', 'app.resources.delete_course', '/courses/1/'),
+        ('delete', 'app.resources.delete_group', '/groups/1/'),
+        ('post', 'app.resources.post_student', '/students/'),
+        ('post', 'app.resources.post_course', '/courses/'),
+        ('post', 'app.resources.post_group', '/groups/'),
+    ])
+    def test_exception_methods(self, api_method, mocked_function_target, resource_path):
+        with patch(mocked_function_target) as mocked_function:
+            mocked_function.side_effect = AssertionError('sample exception massage')
+            answer = getattr(self.app, api_method)(resource_path)
+            self.assertTrue('sample exception massage' in answer.data.decode('utf8'))
+
 
 if __name__ == '__main__':
     unittest.main()
