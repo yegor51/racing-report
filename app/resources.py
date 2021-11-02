@@ -27,7 +27,6 @@ resources:
                 'students_ids' - list of IDs of all students in this group"""
 from flask import request
 from flask_restful import Resource
-from .database_functions import *
 
 
 def return_assertion_massages_decorator(f):

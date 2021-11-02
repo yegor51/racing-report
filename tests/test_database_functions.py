@@ -6,8 +6,7 @@ from app.config import Configuration
 postgresql = testing.postgresql.Postgresql(port=7654)
 Configuration.SQLALCHEMY_DATABASE_URI = postgresql.url()
 
-from app.application import app
-from app.database_functions import *
+from app.application import app, db
 from app.models import StudentModel, GroupModel, CourseModel
 
 
@@ -54,21 +53,11 @@ class TestGetMethodsCase(unittest.TestCase):
         db.create_all()
         db.session.commit()
 
-    @parameterized.expand([
-        (get_group,),
-        (get_student,),
-        (get_course,),
-    ])
-    def test_functions_with_wrong_id(self, function):
-        """all get_ functions should return {} if called with a non-existent id"""
-        answer = function(5)
-        self.assertEqual(answer, {})
-
     def test_get_group(self):
         """test get_group normal working"""
         create_test_groups(1)
 
-        data = get_group(1)
+        data = GroupModel.get_item(1).get_params_dict()
 
         self.assertEqual(data['name'], 'aa-01')
         self.assertEqual(data['students_ids'], [])
@@ -78,7 +67,7 @@ class TestGetMethodsCase(unittest.TestCase):
         create_test_groups(1)
         create_test_students(1)
 
-        data = get_group(1)
+        data = GroupModel.get_item(1).get_params_dict()
 
         self.assertEqual(data['students_ids'], [1])
 
@@ -87,7 +76,7 @@ class TestGetMethodsCase(unittest.TestCase):
         create_test_groups(1)
         create_test_students(1)
 
-        data = get_student(1)
+        data = StudentModel.get_item(1).get_params_dict()
 
         self.assertEqual(data['first_name'], 'first_name_1')
         self.assertEqual(data['last_name'], 'last_name_1')
@@ -98,7 +87,7 @@ class TestGetMethodsCase(unittest.TestCase):
         create_test_groups(1)
         create_test_student_with_course()
 
-        data = get_student(1)
+        data = StudentModel.get_item(1).get_params_dict()
 
         self.assertEqual(data['courses_ids'], [1])
 
@@ -106,7 +95,7 @@ class TestGetMethodsCase(unittest.TestCase):
         """test get_course normal working"""
         create_test_courses(1)
 
-        data = get_course(1)
+        data = CourseModel.get_item(1).get_params_dict()
 
         self.assertEqual(data['name'], 'test_name_1')
         self.assertEqual(data['description'], 'test_description_1')
@@ -117,7 +106,7 @@ class TestGetMethodsCase(unittest.TestCase):
         create_test_groups(1)
         create_test_student_with_course()
 
-        data = get_course(1)
+        data = CourseModel.get_item(1).get_params_dict()
 
         self.assertEqual(data['students_ids'], [1])
 
@@ -126,7 +115,7 @@ class TestGetMethodsCase(unittest.TestCase):
         create_test_groups(1)
         create_test_students(2)
 
-        data = get_all_students()
+        data = StudentModel.get_all_items_params_dict()
 
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]['id'], 1)
@@ -140,7 +129,7 @@ class TestGetMethodsCase(unittest.TestCase):
         """test get_all_courses function"""
         create_test_courses(2)
 
-        data = get_all_courses()
+        data = CourseModel.get_all_items_params_dict()
 
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]['id'], 1)
@@ -154,7 +143,7 @@ class TestGetMethodsCase(unittest.TestCase):
         """test get_all_group function"""
         create_test_groups(2)
 
-        data = get_all_groups()
+        data = GroupModel.get_all_items_params_dict()
 
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]['id'], 1)
@@ -175,9 +164,9 @@ class TestPostMethodsCase(unittest.TestCase):
     def test_post_student(self):
         """test post student function"""
         create_test_groups()
-        post_student(data={'first_name': 'test_first_name',
-                           'last_name': 'test_last_name',
-                           'group_id': 1})
+        StudentModel.post_item(first_name='test_first_name',
+                               last_name='test_last_name',
+                               group_id=1)
 
         students = StudentModel.query.all()
 
@@ -188,10 +177,9 @@ class TestPostMethodsCase(unittest.TestCase):
 
     def test_student_without_group(self):
         with self.assertRaises(AssertionError):
-            post_student(data={'first_name': 'test_first_name',
-                               'last_name': 'test_last_name',
-                               'group_id': 1,
-                               })
+            StudentModel.post_item(first_name='test_first_name',
+                                   last_name='test_last_name',
+                                   group_id=1)
 
         students = StudentModel.query.all()
 
@@ -201,17 +189,16 @@ class TestPostMethodsCase(unittest.TestCase):
         create_test_groups()
 
         with self.assertRaises(AssertionError):
-            post_student(data={'first_name': 'test_first_name',
-                               'group_id': 1,
-                               })
+            StudentModel.post_item(first_name='test_first_name',
+                                   group_id=1)
 
         students = StudentModel.query.all()
 
         self.assertEqual(len(students), 0)
 
     def test_course(self):
-        post_course(data={'name': 'test_name',
-                          'description': 'test_description'})
+        CourseModel.post_item(name='test_name',
+                              description='test_description')
 
         courses = CourseModel.query.all()
 
@@ -221,14 +208,14 @@ class TestPostMethodsCase(unittest.TestCase):
 
     def test_course_with_incomplete_data(self):
         with self.assertRaises(AssertionError):
-            post_course(data={'name': 'test_name'})
+            CourseModel.post_item(name='test_name')
 
         courses = CourseModel.query.all()
 
         self.assertEqual(len(courses), 0)
 
     def test_group(self):
-        post_group(data={'name': 'aa-11'})
+        GroupModel.post_item(name='aa-11')
         groups = GroupModel.query.all()
 
         self.assertEqual(len(groups), 1)
@@ -236,7 +223,7 @@ class TestPostMethodsCase(unittest.TestCase):
 
     def test_group_with_incomplete_data(self):
         with self.assertRaises(AssertionError):
-            post_group({})
+            GroupModel.post_item()
 
         groups = GroupModel.query.all()
 
@@ -244,7 +231,7 @@ class TestPostMethodsCase(unittest.TestCase):
 
     def test_group_with_incorrect_name(self):
         with self.assertRaises(AssertionError):
-            post_group(data={'name': 'test_name'})
+            GroupModel.post_item(name='test_name')
 
         groups = GroupModel.query.all()
 
@@ -263,7 +250,7 @@ class TestPutMethodCase(unittest.TestCase):
         create_test_groups()
         create_test_students(1)
 
-        put_student(1, data={'first_name': 'changed_first_name'})
+        StudentModel.get_item(1).put_params(first_name='changed_first_name')
 
         student = StudentModel.query.first()
 
@@ -275,9 +262,9 @@ class TestPutMethodCase(unittest.TestCase):
         create_test_groups(2)
         create_test_students(1)
 
-        put_student(1, data={'first_name': 'changed_first_name',
-                             'last_name': 'changed_last_name',
-                             'group_id': 2})
+        StudentModel.get_item(1).put_params(first_name='changed_first_name',
+                                            last_name='changed_last_name',
+                                            group_id=2)
 
         student = StudentModel.query.first()
 
@@ -285,21 +272,10 @@ class TestPutMethodCase(unittest.TestCase):
         self.assertEqual(student.last_name, 'changed_last_name')
         self.assertEqual(student.group_id, 2)
 
-    def test_student_with_wrong_id(self):
-        create_test_groups(1)
-        create_test_students(1)
-
-        with self.assertRaises(AssertionError):
-            put_student(100, data={'group_id': 2})
-
-        student = StudentModel.query.first()
-
-        self.assertEqual(student.group_id, 1)
-
     def test_group(self):
         create_test_groups(1)
 
-        put_group(1, data={'name': 'aa-99'})
+        GroupModel.get_item(1).put_params(name='aa-99')
 
         group = GroupModel.query.first()
 
@@ -309,17 +285,7 @@ class TestPutMethodCase(unittest.TestCase):
         create_test_groups(1)
 
         with self.assertRaises(AssertionError):
-            put_group(1, data={'name': 'test_name'})
-
-        group = GroupModel.query.first()
-
-        self.assertEqual(group.name, 'aa-01')
-
-    def test_group_with_wrong_id(self):
-        create_test_groups(1)
-
-        with self.assertRaises(AssertionError):
-            put_group(100, data={'name': 'test_name'})
+            GroupModel.get_item(1).put_params(name='test_name')
 
         group = GroupModel.query.first()
 
@@ -328,7 +294,7 @@ class TestPutMethodCase(unittest.TestCase):
     def test_courses(self):
         create_test_courses(1)
 
-        put_course(1, data={'name': 'changed_name'})
+        CourseModel.get_item(1).put_params(name='changed_name')
 
         course = CourseModel.query.first()
 
@@ -338,22 +304,12 @@ class TestPutMethodCase(unittest.TestCase):
     def test_courses_with_few_changes(self):
         create_test_courses(1)
 
-        put_course(1, data={'name': 'changed_name', 'description': 'changed_description'})
+        CourseModel.get_item(1).put_params(name='changed_name', description='changed_description')
 
         course = CourseModel.query.first()
 
         self.assertEqual(course.name, 'changed_name')
         self.assertEqual(course.description, 'changed_description')
-
-    def test_courses_with_wrong_id(self):
-        create_test_courses(1)
-
-        with self.assertRaises(AssertionError):
-            put_course(100, data={'name': 'changed_name'})
-
-        course = CourseModel.query.first()
-
-        self.assertEqual(course.name, 'test_name_1')
 
 
 class TestDeleteMethodCase(unittest.TestCase):
@@ -368,7 +324,7 @@ class TestDeleteMethodCase(unittest.TestCase):
         create_test_groups()
         create_test_students(2)
 
-        delete_student(1)
+        StudentModel.delete_item(1)
 
         students = StudentModel.query.all()
 
@@ -376,21 +332,10 @@ class TestDeleteMethodCase(unittest.TestCase):
 
         self.assertEqual(students[0].id, 2)
 
-    def test_student_with_wrong_id(self):
-        create_test_groups()
-        create_test_students(1)
-
-        with self.assertRaises(AssertionError):
-            delete_student(100)
-
-        students = StudentModel.query.all()
-
-        self.assertEqual(len(students), 1)
-
     def test_group(self):
         create_test_groups(2)
 
-        delete_group(1)
+        GroupModel.delete_item(1)
 
         groups = GroupModel.query.all()
 
@@ -398,20 +343,10 @@ class TestDeleteMethodCase(unittest.TestCase):
 
         self.assertEqual(groups[0].id, 2)
 
-    def test_group_with_wrong_id(self):
-        create_test_groups(1)
-
-        with self.assertRaises(AssertionError):
-            delete_group(100)
-
-        groups = GroupModel.query.all()
-
-        self.assertEqual(len(groups), 1)
-
     def test_course(self):
         create_test_courses(2)
 
-        delete_course(1)
+        CourseModel.delete_item(1)
 
         courses = CourseModel.query.all()
 
@@ -419,22 +354,12 @@ class TestDeleteMethodCase(unittest.TestCase):
 
         self.assertEqual(courses[0].id, 2)
 
-    def test_course_with_wrong_id(self):
-        create_test_courses(1)
-
-        with self.assertRaises(AssertionError):
-            delete_course(100)
-
-        courses = CourseModel.query.all()
-
-        self.assertEqual(len(courses), 1)
-
     def test_group_with_student(self):
         create_test_groups(1)
         create_test_students(2)
 
         with self.assertRaises(AssertionError):
-            delete_group(1)
+            GroupModel.delete_item(1)
 
         groups = GroupModel.query.all()
 
@@ -444,7 +369,7 @@ class TestDeleteMethodCase(unittest.TestCase):
         create_test_groups(1)
         create_test_student_with_course()
 
-        delete_student(1)
+        StudentModel.delete_item(1)
 
         self.assertFalse(StudentModel.query.all())
         self.assertFalse(CourseModel.query.first().students)
@@ -453,7 +378,7 @@ class TestDeleteMethodCase(unittest.TestCase):
         create_test_groups(1)
         create_test_student_with_course()
 
-        delete_course(1)
+        CourseModel.delete_item(1)
 
         self.assertFalse(CourseModel.query.all())
         self.assertFalse(StudentModel.query.first().courses)
