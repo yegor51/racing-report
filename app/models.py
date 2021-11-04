@@ -32,7 +32,7 @@ tables:
 """
 import re
 from .application import app, db
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, DataError
 
 
 def is_group_name_fits(name):
@@ -64,7 +64,7 @@ class Mixin:
 
         try:
             db.session.commit()
-        except IntegrityError:
+        except (IntegrityError, DataError):
             db.session.rollback()
             raise AssertionError('Incorrect data.')
 

@@ -13,7 +13,7 @@ api = Api(app)
 
 
 from . import models
-from . import resources
+#from . import resources
 
 
 def run_app():

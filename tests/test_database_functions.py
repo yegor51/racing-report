@@ -11,7 +11,6 @@ from app.models import StudentModel, GroupModel, CourseModel
 
 
 def create_test_students(count=1):
-    """add example item to `students` table."""
     for num in range(1, count + 1):
         student = StudentModel(1, f'first_name_{num}', f'last_name_{num}')
         db.session.add(student)
@@ -19,7 +18,6 @@ def create_test_students(count=1):
 
 
 def create_test_groups(count=1):
-    """add example item to `groups` table."""
     for num in range(1, count + 1):
         group = GroupModel(f'aa-{str(num).zfill(2)}')
         db.session.add(group)
@@ -27,7 +25,6 @@ def create_test_groups(count=1):
 
 
 def create_test_courses(count=1):
-    """add example item to `courses` table."""
     for num in range(1, count+1):
         course = CourseModel(f'test_name_{num}', f'test_description_{num}')
         db.session.add(course)
@@ -35,7 +32,6 @@ def create_test_courses(count=1):
 
 
 def create_test_student_with_course():
-    """add example items to `students` and `courses` tables and create relation between them."""
     create_test_students(1)
     create_test_courses(1)
 
@@ -44,7 +40,7 @@ def create_test_student_with_course():
     student.courses.append(course)
 
 
-class TestGetMethodsCase(unittest.TestCase):
+class TestDatabaseWorkingMethodsCase(unittest.TestCase):
 
     def setUp(self):
         """clear all data from test database after previous test."""
@@ -53,8 +49,33 @@ class TestGetMethodsCase(unittest.TestCase):
         db.create_all()
         db.session.commit()
 
-    def test_get_group(self):
-        """test get_group normal working"""
+    @parameterized.expand([
+        (GroupModel,),
+        (CourseModel,),
+        (StudentModel,),
+    ])
+    def test_get_item(self, database_model):
+        create_test_groups(2)
+        create_test_students(2)
+        create_test_courses(2)
+
+        item = database_model.get_item(2)
+
+        self.assertEqual(type(item), database_model)
+        self.assertEqual(item.id, 2)
+
+    @parameterized.expand([
+        (GroupModel,),
+        (CourseModel,),
+        (StudentModel,),
+    ])
+    def test_get_item_with_false_id(self, database_model):
+
+        item = database_model.get_item(5)
+
+        self.assertEqual(item, None)
+
+    def test_group_model_get_params_dict(self):
         create_test_groups(1)
 
         data = GroupModel.get_item(1).get_params_dict()
@@ -62,8 +83,7 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data['name'], 'aa-01')
         self.assertEqual(data['students_ids'], [])
 
-    def test_get_group_with_students(self):
-        """test get_group, normal displaying group with students"""
+    def test_group_model_get_params_dict_with_students(self):
         create_test_groups(1)
         create_test_students(1)
 
@@ -71,8 +91,7 @@ class TestGetMethodsCase(unittest.TestCase):
 
         self.assertEqual(data['students_ids'], [1])
 
-    def test_get_student(self):
-        """test get_student normal working"""
+    def test_student_model_get_params_dict(self):
         create_test_groups(1)
         create_test_students(1)
 
@@ -82,8 +101,7 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data['last_name'], 'last_name_1')
         self.assertEqual(data['courses_ids'], [])
 
-    def test_get_student_with_courses(self):
-        """test get_student, normal displaying student with course."""
+    def test_student_model_get_params_dict_with_courses(self):
         create_test_groups(1)
         create_test_student_with_course()
 
@@ -91,8 +109,7 @@ class TestGetMethodsCase(unittest.TestCase):
 
         self.assertEqual(data['courses_ids'], [1])
 
-    def test_get_course(self):
-        """test get_course normal working"""
+    def test_course_model_get_params_dict(self):
         create_test_courses(1)
 
         data = CourseModel.get_item(1).get_params_dict()
@@ -101,8 +118,7 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data['description'], 'test_description_1')
         self.assertEqual(data['students_ids'], [])
 
-    def test_get_course_with_students(self):
-        """test get_course, normal displaying course with students."""
+    def test_course_model_with_students(self):
         create_test_groups(1)
         create_test_student_with_course()
 
@@ -110,9 +126,8 @@ class TestGetMethodsCase(unittest.TestCase):
 
         self.assertEqual(data['students_ids'], [1])
 
-    def test_students_list(self):
-        """test get_all_students function"""
-        create_test_groups(1)
+    def test_student_model_get_all_items_params_dict(self):
+        create_test_groups(2)
         create_test_students(2)
 
         data = StudentModel.get_all_items_params_dict()
@@ -125,7 +140,7 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data[1]['first_name'], 'first_name_2')
         self.assertEqual(data[1]['last_name'], 'last_name_2')
 
-    def test_courses_list(self):
+    def test_course_model_get_all_items_params_dict(self):
         """test get_all_courses function"""
         create_test_courses(2)
 
@@ -139,7 +154,7 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data[1]['name'], 'test_name_2')
         self.assertEqual(data[1]['description'], 'test_description_2')
 
-    def test_groups_list(self):
+    def test_group_model_get_all_items_params_dict(self):
         """test get_all_group function"""
         create_test_groups(2)
 
@@ -151,210 +166,96 @@ class TestGetMethodsCase(unittest.TestCase):
         self.assertEqual(data[1]['id'], 2)
         self.assertEqual(data[1]['name'], 'aa-02')
 
+    @parameterized.expand([
+        (StudentModel, {'first_name': 'test_first_name', 'last_name': 'test_last_name', 'group_id': 1}),
+        (CourseModel, {'name': 'test_name', 'description': 'test_description'}),
+        (GroupModel, {'name': 'aa-11'}),
+    ])
+    def test_models_post_item(self, database_model, params):
+        if database_model == StudentModel:
+            create_test_groups()
 
-class TestPostMethodsCase(unittest.TestCase):
+        database_model.post_item(**params)
 
-    def setUp(self):
-        """clear all data from test database after previous test."""
-        db.session.commit()
-        db.drop_all()
-        db.create_all()
-        db.session.commit()
+        items = database_model.query.all()
 
-    def test_post_student(self):
-        """test post student function"""
-        create_test_groups()
-        StudentModel.post_item(first_name='test_first_name',
-                               last_name='test_last_name',
-                               group_id=1)
+        self.assertEqual(len(items), 1)
+        for (param_name, param) in params.items():
+            self.assertEqual(getattr(items[0], param_name), param)
 
-        students = StudentModel.query.all()
-
-        self.assertEqual(len(students), 1)
-        self.assertEqual(students[0].first_name, 'test_first_name')
-        self.assertEqual(students[0].last_name, 'test_last_name')
-        self.assertEqual(students[0].group_id, 1)
-
-    def test_student_without_group(self):
-        with self.assertRaises(AssertionError):
-            StudentModel.post_item(first_name='test_first_name',
-                                   last_name='test_last_name',
-                                   group_id=1)
-
-        students = StudentModel.query.all()
-
-        self.assertEqual(len(students), 0)
-
-    def test_student_with_incomplete_data(self):
-        create_test_groups()
+    @parameterized.expand([
+        (StudentModel, {'first_name': 'test_first_name', 'last_name': 'test_last_name', 'group_id': 10}),
+        (StudentModel, {'first_name': 'test_first_name', 'group_id': 1}),
+        (CourseModel, {'name': 'test_name'}),
+        (GroupModel, {'name': 'test_name'}),
+        (GroupModel, {}),
+        ])
+    def test_models_post_item_incorrect_data(self, database_model, params):
+        if database_model == StudentModel:
+            create_test_groups()
 
         with self.assertRaises(AssertionError):
-            StudentModel.post_item(first_name='test_first_name',
-                                   group_id=1)
+            database_model.post_item(**params)
 
-        students = StudentModel.query.all()
+        items = database_model.query.all()
 
-        self.assertEqual(len(students), 0)
+        self.assertEqual(len(items), 0)
 
-    def test_course(self):
-        CourseModel.post_item(name='test_name',
-                              description='test_description')
-
-        courses = CourseModel.query.all()
-
-        self.assertEqual(len(courses), 1)
-        self.assertEqual(courses[0].name, 'test_name')
-        self.assertEqual(courses[0].description, 'test_description')
-
-    def test_course_with_incomplete_data(self):
-        with self.assertRaises(AssertionError):
-            CourseModel.post_item(name='test_name')
-
-        courses = CourseModel.query.all()
-
-        self.assertEqual(len(courses), 0)
-
-    def test_group(self):
-        GroupModel.post_item(name='aa-11')
-        groups = GroupModel.query.all()
-
-        self.assertEqual(len(groups), 1)
-        self.assertEqual(groups[0].name, 'aa-11')
-
-    def test_group_with_incomplete_data(self):
-        with self.assertRaises(AssertionError):
-            GroupModel.post_item()
-
-        groups = GroupModel.query.all()
-
-        self.assertEqual(len(groups), 0)
-
-    def test_group_with_incorrect_name(self):
-        with self.assertRaises(AssertionError):
-            GroupModel.post_item(name='test_name')
-
-        groups = GroupModel.query.all()
-
-        self.assertEqual(len(groups), 0)
-
-
-class TestPutMethodCase(unittest.TestCase):
-    def setUp(self):
-        """clear all data from test database after previous test."""
-        db.session.commit()
-        db.drop_all()
-        db.create_all()
-        db.session.commit()
-
-    def test_student(self):
-        create_test_groups()
+    @parameterized.expand([
+        (StudentModel, {'first_name': 'test_first_name'}),
+        (CourseModel, {'name': 'test_name'}),
+        (GroupModel, {'name': 'aa-11'}),
+        (StudentModel, {'first_name': 'test_first_name', 'last_name': 'test_last_name', 'group_id': 1}),
+        (CourseModel, {'name': 'test_name', 'description': 'test_description'}),
+        ])
+    def test_models_put_params(self, database_model, params):
+        create_test_groups(1)
         create_test_students(1)
+        create_test_courses(1)
 
-        StudentModel.get_item(1).put_params(first_name='changed_first_name')
+        database_model.get_item(1).put_params(**params)
 
-        student = StudentModel.query.first()
+        item = database_model.query.first()
 
-        self.assertEqual(student.first_name, 'changed_first_name')
-        self.assertEqual(student.last_name, 'last_name_1')
-        self.assertEqual(student.group_id, 1)
+        for (param_name, param) in params.items():
+            self.assertEqual(getattr(item, param_name), param)
 
-    def test_student_few_changes(self):
+    @parameterized.expand([
+        (GroupModel, {'name': 'test_name'}),
+        (StudentModel, {'group_id': 'abc'}),
+        ])
+    def test_models_put_params_incorrect_data(self, database_model, params):
+        create_test_groups(1)
+        create_test_students(1)
+        create_test_courses(1)
+
+        with self.assertRaises(AssertionError):
+            database_model.get_item(1).put_params(**params)
+
+        item = database_model.query.first()
+
+        for (param_name, param) in params.items():
+            self.assertNotEqual(getattr(item, param_name), param)
+
+    @parameterized.expand([
+        (GroupModel,),
+        (StudentModel,),
+        (CourseModel,),
+    ])
+    def test_models_delete_item(self, database_model):
         create_test_groups(2)
-        create_test_students(1)
-
-        StudentModel.get_item(1).put_params(first_name='changed_first_name',
-                                            last_name='changed_last_name',
-                                            group_id=2)
-
-        student = StudentModel.query.first()
-
-        self.assertEqual(student.first_name, 'changed_first_name')
-        self.assertEqual(student.last_name, 'changed_last_name')
-        self.assertEqual(student.group_id, 2)
-
-    def test_group(self):
-        create_test_groups(1)
-
-        GroupModel.get_item(1).put_params(name='aa-99')
-
-        group = GroupModel.query.first()
-
-        self.assertEqual(group.name, 'aa-99')
-
-    def test_group_with_wrong_name_format(self):
-        create_test_groups(1)
-
-        with self.assertRaises(AssertionError):
-            GroupModel.get_item(1).put_params(name='test_name')
-
-        group = GroupModel.query.first()
-
-        self.assertEqual(group.name, 'aa-01')
-
-    def test_courses(self):
-        create_test_courses(1)
-
-        CourseModel.get_item(1).put_params(name='changed_name')
-
-        course = CourseModel.query.first()
-
-        self.assertEqual(course.name, 'changed_name')
-        self.assertEqual(course.description, 'test_description_1')
-
-    def test_courses_with_few_changes(self):
-        create_test_courses(1)
-
-        CourseModel.get_item(1).put_params(name='changed_name', description='changed_description')
-
-        course = CourseModel.query.first()
-
-        self.assertEqual(course.name, 'changed_name')
-        self.assertEqual(course.description, 'changed_description')
-
-
-class TestDeleteMethodCase(unittest.TestCase):
-    def setUp(self):
-        """clear all data from test database after previous test."""
-        db.session.commit()
-        db.drop_all()
-        db.create_all()
-        db.session.commit()
-
-    def test_student(self):
-        create_test_groups()
         create_test_students(2)
-
-        StudentModel.delete_item(1)
-
-        students = StudentModel.query.all()
-
-        self.assertEqual(len(students), 1)
-
-        self.assertEqual(students[0].id, 2)
-
-    def test_group(self):
-        create_test_groups(2)
-
-        GroupModel.delete_item(1)
-
-        groups = GroupModel.query.all()
-
-        self.assertEqual(len(groups), 1)
-
-        self.assertEqual(groups[0].id, 2)
-
-    def test_course(self):
         create_test_courses(2)
 
-        CourseModel.delete_item(1)
+        database_model.delete_item(2)
 
-        courses = CourseModel.query.all()
+        items = database_model.query.all()
 
-        self.assertEqual(len(courses), 1)
+        self.assertEqual(len(items), 1)
 
-        self.assertEqual(courses[0].id, 2)
+        self.assertEqual(items[0].id, 1)
 
-    def test_group_with_student(self):
+    def test_delete_group_with_student(self):
         create_test_groups(1)
         create_test_students(2)
 
@@ -365,7 +266,7 @@ class TestDeleteMethodCase(unittest.TestCase):
 
         self.assertEqual(len(groups), 1)
 
-    def test_student_with_course(self):
+    def test_delete_student_with_course(self):
         create_test_groups(1)
         create_test_student_with_course()
 
@@ -374,7 +275,7 @@ class TestDeleteMethodCase(unittest.TestCase):
         self.assertFalse(StudentModel.query.all())
         self.assertFalse(CourseModel.query.first().students)
 
-    def test_course_with_students(self):
+    def test_delete_course_with_students(self):
         create_test_groups(1)
         create_test_student_with_course()
 
