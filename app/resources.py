@@ -27,6 +27,8 @@ resources:
                 'students_ids' - list of IDs of all students in this group"""
 from flask import request
 from flask_restful import Resource
+from .application import api
+from app.models import StudentModel, GroupModel, CourseModel
 
 
 def return_assertion_massages_decorator(f):
@@ -39,75 +41,65 @@ def return_assertion_massages_decorator(f):
     return warper
 
 
-class StudentResource(Resource):
-    def get(self, student_id):
-        return get_student(student_id)
+class ModelResource(Resource):
+    model = None
+
+    def get(self, item_id):
+        item = self.model.get_item(item_id)
+        if not item:
+            return {}
+        return item.get_params_dict()
 
     @return_assertion_massages_decorator
-    def put(self, student_id):
-        return put_student(student_id, request.form)
+    def put(self, item_id):
+        item = self.model.get_item(item_id)
+        if not item:
+            return f'item with id {item_id} not exist in {self.model.__tablename__} model.'
+        return item.put_params(**request.form)
 
     @return_assertion_massages_decorator
-    def delete(self, student_id):
-        return delete_student(student_id)
+    def delete(self, item_id):
+        return self.model.delete_item(item_id)
 
 
-class CourseResource(Resource):
-    def get(self, course_id):
-        return get_course(course_id)
+class ModelListResource(Resource):
+    model = StudentModel
 
-    @return_assertion_massages_decorator
-    def put(self, course_id):
-        return put_course(course_id, request.form)
-
-    @return_assertion_massages_decorator
-    def delete(self, course_id):
-        return delete_course(course_id)
-
-
-class GroupResource(Resource):
-    def get(self, group_id):
-        return get_group(group_id)
-
-    @return_assertion_massages_decorator
-    def put(self, group_id):
-        return put_group(group_id, request.form)
-
-    @return_assertion_massages_decorator
-    def delete(self, group_id):
-        return delete_group(group_id)
-
-
-class StudentListResource(Resource):
     def get(self):
-        return get_all_students()
+        return self.model.get_all_items_params_dict()
 
     @return_assertion_massages_decorator
     def post(self):
-        return post_student(request.form)
+        return self.model.post_item(**request.form)
 
 
-class CourseListResource(Resource):
-    def get(self):
-        return get_all_courses()
-
-    @return_assertion_massages_decorator
-    def post(self):
-        return post_course(request.form)
+class StudentResource(ModelResource):
+    model = StudentModel
 
 
-class GroupListResource(Resource):
-    def get(self):
-        return get_all_groups()
-
-    @return_assertion_massages_decorator
-    def post(self):
-        return post_group(request.form)
+class CourseResource(ModelResource):
+    model = CourseModel
 
 
-api.add_resource(StudentResource, '/students/<int:student_id>/', '/students/<int:student_id>')
-api.add_resource(CourseResource, '/courses/<int:course_id>/', '/courses/<int:course_id>')
-api.add_resource(GroupResource, '/groups/<int:group_id>/', '/groups/<int:group_id>')
+class GroupResource(ModelResource):
+    model = GroupModel
+
+
+class StudentListResource(ModelListResource):
+    model = StudentModel
+
+
+class GroupListResource(ModelListResource):
+    model = GroupModel
+
+
+class CourseListResource(ModelListResource):
+    model = CourseModel
+
+
+api.add_resource(StudentResource, '/students/<int:item_id>/', '/students/<int:item_id>')
+api.add_resource(CourseResource, '/courses/<int:item_id>/', '/courses/<int:item_id>')
+api.add_resource(GroupResource, '/groups/<int:item_id>/', '/groups/<int:item_id>')
 
 api.add_resource(StudentListResource, '/students/', '/students')
 api.add_resource(CourseListResource, '/courses/', '/courses')

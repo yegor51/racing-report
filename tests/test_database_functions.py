@@ -255,6 +255,16 @@ class TestDatabaseWorkingMethodsCase(unittest.TestCase):
 
         self.assertEqual(items[0].id, 1)
 
+    @parameterized.expand([
+        (GroupModel,),
+        (StudentModel,),
+        (CourseModel,),
+    ])
+    def test_models_delete_item_wrong_id(self, database_model):
+        res = database_model.delete_item(10)
+
+        items = database_model.query.all()
+
     def test_delete_group_with_student(self):
         create_test_groups(1)
         create_test_students(2)
